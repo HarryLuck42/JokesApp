@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "CategoryListApp",
-    "slug": "CategoryListApp",
+    "name": "JokesApp",
+    "slug": "JokesApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,13 +9,15 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "corp.luqman.JokesApp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "corp.luqman.JokesApp"
     },
     "web": {
       "bundler": "metro",
