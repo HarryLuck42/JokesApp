@@ -28,7 +28,10 @@ const categoryScreen = () => {
   const actions = categoriesSlice.actions;
 
   useEffect(() => {
-    fetchCategories();
+    dispatch(actions.resetJokes());
+    setTimeout(function () {
+      fetchCategories();
+    }, 10);
   }, [refresh]);
 
   useEffect(() => {
@@ -122,6 +125,19 @@ const categoryScreen = () => {
 
   const separatorComp = <View style={styles.separator} />;
 
+  const loadingPage = (
+    <View style={styles.loadingView}>
+      <AnimatedCircularProgress
+        size={120}
+        width={15}
+        fill={100}
+        tintColor={theme.primary}
+        onAnimationComplete={() => console.log("onAnimationComplete")}
+        backgroundColor={theme.primaryBackground}
+      />
+      <Text style={{ marginTop: 16 }}>Loading...</Text>
+    </View>
+  );
   return (
     <Container
       style={{
@@ -131,17 +147,7 @@ const categoryScreen = () => {
       }}
     >
       {isLoading ? (
-        <View style={styles.loadingView}>
-          <AnimatedCircularProgress
-            size={120}
-            width={15}
-            fill={100}
-            tintColor={theme.primary}
-            onAnimationComplete={() => console.log("onAnimationComplete")}
-            backgroundColor={theme.primaryBackground}
-          />
-          <Text style={{ marginTop: 16 }}>Loading...</Text>
-        </View>
+        loadingPage
       ) : (
         <FlatList
           data={list}
@@ -158,7 +164,7 @@ const categoryScreen = () => {
               }}
             />
           }
-          ListEmptyComponent={<Text>No items</Text>}
+          ListEmptyComponent={loadingPage}
           renderItem={({ item, index }) => {
             return <CategoryItem item={item} index={index} />;
           }}
@@ -209,37 +215,6 @@ function createStyles(theme, colorScheme) {
       shadowRadius: 2,
       marginHorizontal: 4,
       marginVertical: 6,
-    },
-    menuTextRow: {
-      width: "45%",
-      paddingTop: 16,
-      paddingLeft: 16,
-      paddingBottom: 16,
-      paddingRight: 16,
-    },
-    buttonTop: {
-      width: "25%",
-      maxWidth: 100,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    arrowIcon: {
-      width: "25%",
-      justifyContent: "center",
-      alignItems: "flex-end",
-    },
-    menuItemTitle: {
-      fontSize: 18,
-      color: theme.text,
-    },
-    topText: {
-      color: theme.text,
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    menuImage: {
-      width: 100,
-      height: 100,
     },
   });
 }

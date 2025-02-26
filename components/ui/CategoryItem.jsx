@@ -1,85 +1,86 @@
+import React from "react";
 import {
-  Animated,
   Appearance,
   Button,
   FlatList,
-  LayoutAnimation,
+  Modal,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
 import { useDispatch, useSelector } from "react-redux";
 import categoriesSlice from "@/redux/categories-slice";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import axios from "axios";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { Fonts } from "@/constants/Fonts";
+import { IconSymbol } from "./IconSymbol";
 
 const CategoryItem = (props) => {
-  useEffect(() => {
-    if (props.item.isOpen) {
-      getListJokes(props.item.name);
-    }
-  }, [props.item.isOpen]);
-
   const dispatch = useDispatch();
 
   const actions = categoriesSlice.actions;
 
-  const animatedController = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (props.item.isOpen) {
+      if (props.item.jokes.length == 0) {
+        getListJokes();
+      }
+    }
+  }, [props.item.isOpen]);
+
+  const showDialog = (value) => dispatch(actions.showDialog(value));
+
+  const hideDialog = () => dispatch(actions.showDialog(null));
 
   const getListJokes = () => {
-    console.log("fetching jokes for " + props.item.name);
-    dispatch(actions.fetchJokes(props.index));
+    const isReload = props.item.jokes.length == 0;
+    if (isReload) {
+      dispatch(actions.fetchJokes(props.index));
+    }
+
     axios
       .get(
-        `https://v2.jokeapi.dev/joke/${props.item.name}?type=single&amount=10`
+        `https://v2.jokeapi.dev/joke/${props.item.name}?type=single&amount=2`
       )
       .then((response) => {
-        console.log(response.data);
-        dispatch(
-          actions.fetchJokesSuccess({
-            jokes: response.data.jokes,
-            index: props.index,
-          })
-        );
+        console.log(`hasil api:`);
+        console.log(response.data.jokes);
+        if (isReload) {
+          dispatch(
+            actions.fetchJokesSuccess({
+              jokes: response.data.jokes,
+              index: props.index,
+            })
+          );
+        } else {
+          dispatch(
+            actions.addJokes({
+              jokes: response.data.jokes,
+              index: props.index,
+            })
+          );
+        }
       })
       .catch((error) => {
-        console.log(error);
         dispatch(actions.fetchJokesFailure(props.index));
       });
   };
 
-  const toggleAnimation = {
-    duration: 300,
-    update: {
-      duration: 300,
-      property: LayoutAnimation.Properties.opacity,
-      type: LayoutAnimation.Types.easeInEaseOut,
-    },
-    delete: {
-      duration: 200,
-      property: LayoutAnimation.Properties.opacity,
-      type: LayoutAnimation.Types.easeInEaseOut,
-    },
-  };
-  const toggleListItem = () => {
-    const config = {
-      duration: 300,
-      toValue: props.item.isOpen ? 0 : 1,
-      useNativeDriver: true,
+  const rotate = useSharedValue(props.item.isOpen ? 90 : 270);
+  const rotateStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotate.value}deg` }],
     };
-    Animated.timing(animatedController, config).start();
-    LayoutAnimation.configureNext(toggleAnimation);
-    dispatch(actions.openChild(props.index));
-  };
-
-  const arrowTransform = animatedController.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "90deg"],
   });
 
   const colorScheme = Appearance.getColorScheme();
@@ -87,6 +88,8 @@ const CategoryItem = (props) => {
   const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
   const styles = createStyles(theme, colorScheme);
+
+  const detail = useSelector((state) => state.categories.detail);
 
   const separatorComp = <View style={styles.separator} />;
 
@@ -104,7 +107,6 @@ const CategoryItem = (props) => {
               color={theme.primaryBackground}
               title={"Go Top"}
               onPress={() => {
-                console.log("Viewing " + props.item);
                 dispatch(
                   actions.goToTop({ item: props.item, index: props.index })
                 );
@@ -117,12 +119,15 @@ const CategoryItem = (props) => {
             <TouchableOpacity
               key={props.index}
               onPress={() => {
-                toggleListItem();
+                dispatch(actions.openChild(props.index));
+                if (props.item.isOpen) {
+                  rotate.value = withTiming(270, { duration: 300 });
+                } else {
+                  rotate.value = withTiming(90, { duration: 300 });
+                }
               }}
             >
-              <Animated.View
-                style={{ transform: [{ rotate: arrowTransform }] }}
-              >
+              <Animated.View style={rotateStyle}>
                 <IconSymbol
                   name="chevron.right"
                   size={35}
@@ -163,9 +168,49 @@ const CategoryItem = (props) => {
                 )
               }
               renderItem={({ item, index }) => {
-                return <Text style={styles.jokeText}>{item.joke}</Text>;
+                console.log(`joke item: ${item.joke}`);
+                return (
+                  <Pressable
+                    onPress={() => {
+                      showDialog(item.joke);
+                    }}
+                  >
+                    <View>
+                      <Text style={styles.jokeText}>{item.joke}</Text>
+                    </View>
+                  </Pressable>
+                );
               }}
             />
+            {props.item.jokes.length < 5 && (
+              <View style={styles.buttonAddView}>
+                <Button
+                  color={theme.primaryBackground}
+                  title={"Add more data"}
+                  onPress={() => {
+                    getListJokes();
+                  }}
+                />
+              </View>
+            )}
+
+            <Modal
+              visible={detail != null}
+              animationType="fade"
+              transparent={true}
+            >
+              <View style={styles.centerDialog}>
+                <View style={styles.modalView}>
+                  <Text style={styles.modalTitle}>Detail</Text>
+                  <Text style={styles.modalText}>{detail}</Text>
+                  <View style={styles.buttonOkView}>
+                    <TouchableOpacity onPress={hideDialog}>
+                      <Text style={styles.buttonOkText}>OK</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
           </View>
         )
       )}
@@ -177,6 +222,46 @@ export default CategoryItem;
 
 function createStyles(theme, colorScheme) {
   return StyleSheet.create({
+    buttonAddView: {
+      marginVertical: 10,
+      marginHorizontal: 16,
+    },
+    centerDialog: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalView: {
+      width: "80%",
+      backgroundColor: theme.background,
+      padding: 16,
+      borderRadius: 20,
+      shadowColor: "#333",
+      elevation: 16,
+    },
+    modalTitle: {
+      fontSize: 26,
+      marginBottom: 10,
+      width: "100%",
+      textAlign: "center",
+      color: theme.primaryBackground,
+      fontFamily: Fonts.bold,
+    },
+    modalText: {
+      fontSize: 20,
+      marginBottom: 10,
+      color: theme.icon,
+      fontFamily: Fonts.mediumItalic,
+    },
+    buttonOkView: {
+      alignItems: "flex-end",
+      paddingHorizontal: 10,
+    },
+    buttonOkText: {
+      fontSize: 20,
+      fontFamily: Fonts.bold,
+      color: theme.primaryBackground,
+    },
     hidden: {
       height: 0,
     },
@@ -244,17 +329,18 @@ function createStyles(theme, colorScheme) {
       alignItems: "flex-end",
     },
     menuItemTitle: {
-      fontSize: 18,
+      fontSize: 20,
+      fontFamily: Fonts.regular,
       color: theme.text,
     },
     topText: {
       color: theme.text,
-      fontSize: 16,
-      fontWeight: "bold",
+      fontSize: 18,
+      fontFamily: Fonts.medium,
     },
     jokeText: {
       fontSize: 18,
-      fontWeight: "bold",
+      fontFamily: Fonts.bold,
       marginVertical: 10,
       marginHorizontal: 16,
     },

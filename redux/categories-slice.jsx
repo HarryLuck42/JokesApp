@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -7,12 +6,18 @@ const initialState = {
   error: null,
   isEmpty: false,
   refresh: false,
+  detail: null,
 };
 
 const categoriesSlice = createSlice({
   name: "categories",
   initialState,
   reducers: {
+    resetJokes: (state) => {
+      state.list.forEach((item, index) => {
+        state.list[index].jokes = [];
+      });
+    },
     fetchCategories: (state) => {
       state.loading = true;
     },
@@ -48,8 +53,16 @@ const categoriesSlice = createSlice({
       state.list[action.payload.index].jokes = action.payload.jokes;
       state.list[action.payload.index].isLoading = false;
     },
+    addJokes: (state, action) => {
+      action.payload.jokes.forEach((item) => {
+        state.list[action.payload.index].jokes.push(item);
+      });
+    },
     fetchJokesFailure: (state, action) => {
       state.list[action.payload].isLoading = false;
+    },
+    showDialog: (state, action) => {
+      state.detail = action.payload;
     },
   },
 });

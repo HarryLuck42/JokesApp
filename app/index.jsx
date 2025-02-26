@@ -7,7 +7,8 @@ import {
 } from "react-native";
 import { Link } from "expo-router";
 
-import minionsImg from "@/assets/images/minions.webp";
+import minionsImg from "../assets/images/minions.webp";
+import { Fonts } from "../constants/Fonts";
 
 const app = () => {
   return (
@@ -17,7 +18,7 @@ const app = () => {
         resizeMode="contain"
         style={styles.image}
       >
-        <Text style={styles.title}>Have a Fun!!</Text>
+        <Text style={styles.title}>Enjoy For A Joke!!</Text>
 
         <Link href="/menu" style={{ marginHorizontal: "auto" }} asChild>
           <Pressable style={styles.button}>
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
   title: {
     color: "white",
     fontSize: 32,
-    fontWeight: "bold",
+    fontFamily: Fonts.extraBold,
     textAlign: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
     marginBottom: 70,
@@ -76,8 +77,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontFamily: Fonts.boldItalic,
     textAlign: "center",
     padding: 4,
   },

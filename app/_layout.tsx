@@ -19,6 +19,24 @@ export default function RootLayout() {
 
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    black: require("../assets/fonts/FiraSans-Black.ttf"),
+    blackItalic: require("../assets/fonts/FiraSans-BlackItalic.ttf"),
+    extraBold: require("../assets/fonts/FiraSans-ExtraBold.ttf"),
+    extraBoldItalic: require("../assets/fonts/FiraSans-ExtraBold.ttf"),
+    bold: require("../assets/fonts/FiraSans-Bold.ttf"),
+    boldItalic: require("../assets/fonts/FiraSans-BoldItalic.ttf"),
+    semiBold: require("../assets/fonts/FiraSans-SemiBold.ttf"),
+    semiBoldItalic: require("../assets/fonts/FiraSans-SemiBoldItalic.ttf"),
+    medium: require("../assets/fonts/FiraSans-Medium.ttf"),
+    mediumItalic: require("../assets/fonts/FiraSans-MediumItalic.ttf"),
+    regular: require("../assets/fonts/FiraSans-Regular.ttf"),
+    italic: require("../assets/fonts/FiraSans-Italic.ttf"),
+    light: require("../assets/fonts/FiraSans-Light.ttf"),
+    lightItalic: require("../assets/fonts/FiraSans-LightItalic.ttf"),
+    extraLight: require("../assets/fonts/FiraSans-ExtraLight.ttf"),
+    extraLightItalic: require("../assets/fonts/FiraSans-ExtraLightItalic.ttf"),
+    thin: require("../assets/fonts/FiraSans-Thin.ttf"),
+    thinItalic: require("../assets/fonts/FiraSans-ThinItalic.ttf"),
   });
 
   useEffect(() => {
